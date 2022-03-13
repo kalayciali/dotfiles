@@ -89,6 +89,15 @@ au InsertLeave * match ExtraWhitespace /\s\+$/
 au BufWinLeave * call clearmatches()
 nnoremap <silent> <leader>rs :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
 
+" remove print sttments
+function! s:JbzRemoveDebugPrints()
+  let save_cursor = getcurpos()
+  :g/\/\/\ prdbg$/d
+  call setpos('.', save_cursor)
+endfunction
+command! JbzRemoveDebugPrints call s:JbzRemoveDebugPrints()
+
+au FileType c,cpp nnoremap <buffer><leader>rd :JbzRemoveDebugPrints<CR>
 
 " ycm
 set completeopt-=preview
@@ -123,6 +132,33 @@ nnoremap <silent> <leader>k :FSSplitAbove<cr>
 nnoremap <silent> <leader>l :FSSplitRight<cr>
 
 let g:vimspector_enable_mappings = 'HUMAN'
+nmap <leader>dd :call vimspector#Launch()<CR>
+nmap <leader>dx :VimspectorReset<CR>
+nmap <leader>de :VimspectorEval
+nmap <leader>dw :VimspectorWatch
+nmap <leader>do :VimspectorShowOutput
+
+" ultisnips
+let g:UltiSnipsExpandTrigger="<leader>a"
+let g:UltiSnipsJumpForwardTrigger="<c-b>"
+let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+
+" clang-format
+function! s:JbzClangFormat(first, last)
+  let l:winview = winsaveview()
+  execute a:first . "," . a:last . "!clang-format"
+  call winrestview(l:winview)
+endfunction
+command! -range=% JbzClangFormat call <sid>JbzClangFormat (<line1>, <line2>)
+
+au FileType c,cpp nnoremap <buffer><leader>lf :<C-u>JbzClangFormat<CR>
+au FileType c,cpp vnoremap <buffer><leader>lf :JbzClangFormat<CR>
+
+
+" tagbar
+nmap <leader>v :TagbarToggle<CR>
+
+
 
 
 " emmet
@@ -151,5 +187,9 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 Plug 'godlygeek/tabular'
 Plug 'preservim/vim-markdown'
 Plug 'derekwyatt/vim-fswitch'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+Plug 'preservim/tagbar'
+Plug 'ludovicchabant/vim-gutentags'
 call plug#end()
 
