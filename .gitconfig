@@ -1,0 +1,17 @@
+[user]
+	name = kalayciali
+	email = kalayciali857@gmail.com
+
+[core]
+	editor = vim
+
+[alias]
+	st = status -sb
+	co = checkout
+	ls = log -p
+	lg = log --graph --format=line # graph
+	lgd = log --graph --format=detail # graph detail
+	lga = log --graph --format=line --all # graph all
+
+[color]
+	ui = auto

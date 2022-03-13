@@ -1,4 +1,3 @@
-" If you open this file in Vim, it'll be syntax highlighted for you.
 
 " Vim is based on Vi. Setting `nocompatible` switches from the default
 " Vi-compatibility mode and enables useful Vim functionality. This
@@ -14,6 +13,8 @@ syntax on
 
 " Disable the default Vim startup message.
 set shortmess+=I
+
+colorscheme zenburn
 
 " Show line numbers.
 set number
@@ -57,6 +58,8 @@ set noerrorbells visualbell t_vb=
 " sometimes be convenient.
 set mouse+=a
 
+let mapleader = ","
+
 " zoom in out for windows
 noremap Zz <c-w>_ \| <c-w>\|
 noremap Zo <c-w>=
@@ -76,35 +79,77 @@ inoremap <Right> <ESC>:echoe "Use l"<CR>
 inoremap <Up>    <ESC>:echoe "Use k"<CR>
 inoremap <Down>  <ESC>:echoe "Use j"<CR>
 
+
+" trailing whitespace
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+$/
+au BufWinEnter * match ExtraWhitespace /\s\+$/
+au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+au InsertLeave * match ExtraWhitespace /\s\+$/
+au BufWinLeave * call clearmatches()
+nnoremap <silent> <leader>rs :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
+
+
 " ycm
 set completeopt-=preview
+
+" cppman stuff
+runtime! ftplugin/man.vim
+
+function! s:JbzCppMan()
+    let old_isk = &iskeyword
+    setl iskeyword+=:
+    let str = expand("<cword>")
+    let &l:iskeyword = old_isk
+    execute 'Man ' . str
+endfunction
+command! JbzCppMan :call s:JbzCppMan()
+au FileType cpp nnoremap <buffer>K :JbzCppMan<CR>
 
 "ctrlP
 let g:ctrlp_map = '<c-p>'
 let g:ctrlp_cmd = 'CtrlP'
 let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+"fswitch
+au BufEnter *.h  let b:fswitchdst = "c,cpp,cc,m"
+au BufEnter *.cc let b:fswitchdst = "h,hpp"
+au BufEnter *.h let b:fswitchdst = 'c,cpp,m,cc' | let b:fswitchlocs = 'reg:|include.*|src/**|'
+nnoremap <silent> <A-o> :FSHere<cr>
+" Extra hotkeys to open header/source in the split
+nnoremap <silent> <leader>h :FSSplitLeft<cr>
+nnoremap <silent> <leader>j :FSSplitBelow<cr>
+nnoremap <silent> <leader>k :FSSplitAbove<cr>
+nnoremap <silent> <leader>l :FSSplitRight<cr>
 
-" emmet 
+let g:vimspector_enable_mappings = 'HUMAN'
+
+
+" emmet
 let g:user_emmet_leader_key=','
 
-"nerdtree config 
+" markdown preview
+nmap <C-o> <Plug>MarkdownPreview
+
+"nerdtree config
 map <C-n> :NERDTreeToggle<CR>
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 " Plugins
-set nocompatible
-filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'preservim/nerdtree'
-Plugin 'preservim/nerdcommenter'
-Plugin 'mattn/emmet-vim'
-Plugin 'jiangmiao/auto-pairs'
-Plugin 'sheerun/vim-polyglot'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'ycm-core/YouCompleteMe'
-call vundle#end()
-filetype plugin indent on
+call plug#begin()
+Plug 'VundleVim/Vundle.vim'
+Plug 'preservim/nerdtree'
+Plug 'preservim/nerdcommenter'
+Plug 'mattn/emmet-vim'
+Plug 'jiangmiao/auto-pairs'
+Plug 'sheerun/vim-polyglot'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'ycm-core/YouCompleteMe'
+Plug 'vim-syntastic/syntastic'
+Plug 'puremourning/vimspector'
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
+Plug 'godlygeek/tabular'
+Plug 'preservim/vim-markdown'
+Plug 'derekwyatt/vim-fswitch'
+call plug#end()
 
