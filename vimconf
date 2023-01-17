@@ -1,30 +1,20 @@
-
-" Vim is based on Vi. Setting `nocompatible` switches from the default
-" Vi-compatibility mode and enables useful Vim functionality. This
-" configuration option turns out not to be necessary for the file named
-" '~/.vimrc', because Vim automatically enters nocompatible mode if that file
-" is present. But we're including it here just in case this config file is
-" loaded some other way (e.g. saved as `foo`, and then Vim started with
-" `vim -u foo`).
 set nocompatible
 
 " Turn on syntax highlighting.
 syntax on
 
+colorscheme zenburn
+let g:airline_theme='minimalist'
+
+set pumheight=10
+
 " Disable the default Vim startup message.
 set shortmess+=I
 
-colorscheme zenburn
-
-" Show line numbers.
+set splitbelow                          " Horizontal splits will automatically be below
+set splitright                          " Vertical splits will automatically be to the right
 set number
 
-" This enables relative line numbering mode. With both number and
-" relativenumber enabled, the current line shows the true line number, while
-" all other lines (above and below) are numbered relative to the current line.
-" This is useful because you can tell, at a glance, what count is needed to
-" jump up or down to a particular line, by {count}k to go up or {count}j to go
-" down.
 set relativenumber
 
 " Always show the status line at the bottom, even if you only have one window open.
@@ -32,11 +22,19 @@ set laststatus=2
 
 set hidden
 set autoindent
+set nosmartindent                       " prevents extra indenting
 set lbr
+
 set expandtab
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+set smarttab
+
+set laststatus=0                        " Always display the status line
+set cursorline                          " Enable highlighting of the current line
+set background=dark
+
 
 
 " This setting makes search case-insensitive when all characters in the string
@@ -63,22 +61,6 @@ let mapleader = ","
 " zoom in out for windows
 noremap Zz <c-w>_ \| <c-w>\|
 noremap Zo <c-w>=
-" Try to prevent bad habits like using the arrow keys for movement. This is
-" not the only possible bad habit. For example, holding down the h/j/k/l keys
-" for movement, rather than using more efficient movement commands, is also a
-" bad habit. The former is enforceable through a .vimrc, while we don't know
-" how to prevent the latter.
-" Do this in normal mode...
-nnoremap <Left>  :echoe "Use h"<CR>
-nnoremap <Right> :echoe "Use l"<CR>
-nnoremap <Up>    :echoe "Use k"<CR>
-nnoremap <Down>  :echoe "Use j"<CR>
-" ...and in insert mode
-inoremap <Left>  <ESC>:echoe "Use h"<CR>
-inoremap <Right> <ESC>:echoe "Use l"<CR>
-inoremap <Up>    <ESC>:echoe "Use k"<CR>
-inoremap <Down>  <ESC>:echoe "Use j"<CR>
-
 
 " trailing whitespace
 highlight ExtraWhitespace ctermbg=red guibg=red
@@ -102,24 +84,12 @@ au FileType c,cpp nnoremap <buffer><leader>rd :JbzRemoveDebugPrints<CR>
 " ycm
 set completeopt-=preview
 
-" cppman stuff
-runtime! ftplugin/man.vim
-
-function! s:JbzCppMan()
-    let old_isk = &iskeyword
-    setl iskeyword+=:
-    let str = expand("<cword>")
-    let &l:iskeyword = old_isk
-    execute 'Man ' . str
-endfunction
-command! JbzCppMan :call s:JbzCppMan()
-au FileType cpp nnoremap <buffer>K :JbzCppMan<CR>
-
 "ctrlP
 let g:ctrlp_map = '<c-p>'
 let g:ctrlp_cmd = 'CtrlP'
 let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
 "fswitch
 au BufEnter *.h  let b:fswitchdst = "c,cpp,cc,m"
 au BufEnter *.cc let b:fswitchdst = "h,hpp"
@@ -140,8 +110,8 @@ nmap <leader>do :VimspectorShowOutput
 
 " ultisnips
 let g:UltiSnipsExpandTrigger="<leader>a"
-let g:UltiSnipsJumpForwardTrigger="<c-b>"
-let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+let g:UltiSnipsJumpForwardTrigger="<leader>f"
+let g:UltiSnipsJumpForwardTrigger="<leader>b"
 
 " clang-format
 function! s:JbzClangFormat(first, last)
@@ -151,45 +121,106 @@ function! s:JbzClangFormat(first, last)
 endfunction
 command! -range=% JbzClangFormat call <sid>JbzClangFormat (<line1>, <line2>)
 
-au FileType c,cpp nnoremap <buffer><leader>lf :<C-u>JbzClangFormat<CR>
-au FileType c,cpp vnoremap <buffer><leader>lf :JbzClangFormat<CR>
+au FileType c,cpp nnoremap <buffer><leader>f :<C-u>JbzClangFormat<CR>
+au FileType c,cpp vnoremap <buffer><leader>f :JbzClangFormat<CR>
+
+" python
+autocmd FileType python map <buffer><leader>c :w<CR>:exec '!python3' shellescape(@%, 1)<CR>
+autocmd FileType python imap <buffer><leader>c <esc>:w<CR>:exec '!python3' shellescape(@%, 1)<CR>
 
 
 " tagbar
 nmap <leader>v :TagbarToggle<CR>
 
-
-
-
 " emmet
 let g:user_emmet_leader_key=','
 
-" markdown preview
+" MARKDOWN PREVIEW
 nmap <C-o> <Plug>MarkdownPreview
+let g:mkdp_browser = 'firefox'
 
-"nerdtree config
+" nerdtree config
 map <C-n> :NERDTreeToggle<CR>
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
+" latex stuff
+let g:tex_flavor='latex'
+let g:vimtex_view_method='zathura'
+let g:vimtex_quickfix_mode=0
+set conceallevel=1
+let g:tex_conceal='abdmg'
+let maplocalleader = ","
+let g:vimtex_quickfix_open_on_warning = 0
+let g:vimtex_log_ignore = [
+        \ 'Underfull',
+        \ 'Overfull',
+        \ 'specifier changed to',
+        \ 'Token not allowed in a PDF string',
+      \ ]
+let g:vimtex_context_pdf_viewer=1
+let g:vimtex_context_pdf_viewer= 'okular'
+
+
+
+" spelling errors
+setlocal spell
+set spelllang=en_gb
+inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
+
+" The Silver Searcher
+if executable('ag')
+  " Use ag over grep
+  set grepprg=ag\ --nogroup\ --nocolor
+
+  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+
+  " ag is fast enough that CtrlP doesn't need to cache
+  let g:ctrlp_use_caching = 0
+endif
+" bind K to grep word under cursor
+nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+
+" bind \ (backward slash) to grep shortcut
+command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
+nnoremap \ :Ag<SPACE>
+
+
+
 " Plugins
 call plug#begin()
-Plug 'VundleVim/Vundle.vim'
-Plug 'preservim/nerdtree'
-Plug 'preservim/nerdcommenter'
-Plug 'mattn/emmet-vim'
-Plug 'jiangmiao/auto-pairs'
-Plug 'sheerun/vim-polyglot'
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'ycm-core/YouCompleteMe'
-Plug 'vim-syntastic/syntastic'
-Plug 'puremourning/vimspector'
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
-Plug 'godlygeek/tabular'
-Plug 'preservim/vim-markdown'
-Plug 'derekwyatt/vim-fswitch'
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
-Plug 'preservim/tagbar'
-Plug 'ludovicchabant/vim-gutentags'
+
+  Plug 'preservim/nerdtree'
+  Plug 'preservim/nerdcommenter'
+  Plug 'mattn/emmet-vim'
+  Plug 'jiangmiao/auto-pairs'
+  Plug 'sheerun/vim-polyglot'
+  Plug 'ctrlpvim/ctrlp.vim'
+  Plug 'ycm-core/YouCompleteMe'
+  Plug 'vim-syntastic/syntastic'
+  Plug 'lervag/vimtex'
+  Plug 'puremourning/vimspector'
+  Plug 'unblevable/quick-scope'
+  Plug 'tpope/vim-repeat'
+  Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
+  Plug 'godlygeek/tabular'
+  Plug 'preservim/vim-markdown'
+  Plug 'vim-airline/vim-airline'
+  " cpp
+  Plug 'derekwyatt/vim-fswitch'
+  " snippets
+  Plug 'SirVer/ultisnips'
+  " tagging
+  Plug 'preservim/tagbar'
+  Plug 'ludovicchabant/vim-gutentags'
+  Plug 'vim-airline/vim-airline-themes'
+
 call plug#end()
+
+" Automatically install missing plugins on startup
+autocmd VimEnter *
+  \  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+  \|   PlugInstall --sync | q
+  \| endif
+
 
